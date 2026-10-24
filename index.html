@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Class 10 Math & Hydration Companion</title>
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Class%2010%20Math%20Companion%22%2C%22short_name%22%3A%22MathApp%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%2310b981%22%7D">
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Class%2010%20Math%20Companion%22%2C%22short_name%22%3A%22MathApp%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%2310b981%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%90%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
   <style>
     :root {
       --bg: #0f172a;
@@ -567,6 +567,13 @@
   </div>
 
   <script>
+    // Register Service Worker for PWA installability
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+      });
+    }
+
     function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -603,4 +610,241 @@
         playBeepPattern();
         if (synthInterval) clearInterval(synthInterval);
         synthInterval = setInterval(playBeepPattern, 1200);
-      
+      }
+    }
+
+    function playBeepPattern() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.8);
+      } catch (e) {}
+    }
+
+    function stopAlarmModal() {
+      if (isCustomAudioLoaded) {
+        customAudioPlayer.pause();
+        customAudioPlayer.currentTime = 0;
+      }
+      if (synthInterval) {
+        clearInterval(synthInterval);
+        synthInterval = null;
+      }
+      document.getElementById('alarm-modal').style.display = 'none';
+    }
+
+    let studyInterval = null;
+    let studySecondsLeft = 1200;
+
+    function setStudyMin(val) {
+      document.getElementById('study-min').value = val;
+      updateStudyDisplay(val * 60);
+    }
+
+    function updateStudyDisplay(secs) {
+      const m = Math.floor(secs / 60).toString().padStart(2, '0');
+      const s = (secs % 60).toString().padStart(2, '0');
+      document.getElementById('study-display').innerText = `${m}:${s}`;
+      document.getElementById('overlay-timer').innerText = `${m}:${s}`;
+    }
+
+    function toggleStudyTimer() {
+      if (studyInterval) {
+        stopStudyTimer();
+      } else {
+        let mins = parseInt(document.getElementById('study-min').value) || 20;
+        mins = Math.min(Math.max(mins, 1), 60);
+        studySecondsLeft = mins * 60;
+        
+        document.getElementById('focus-overlay').classList.add('active');
+        document.getElementById('study-btn').innerText = 'Stop Sprint';
+
+        studyInterval = setInterval(() => {
+          studySecondsLeft--;
+          updateStudyDisplay(studySecondsLeft);
+          if (studySecondsLeft <= 0) {
+            stopStudyTimer();
+            showAlarmModal('📚 Study Sprint Finished! Take a break.');
+          }
+        }, 1000);
+      }
+    }
+
+    function stopStudyTimer() {
+      clearInterval(studyInterval);
+      studyInterval = null;
+      document.getElementById('focus-overlay').classList.remove('active');
+      document.getElementById('study-btn').innerText = 'Start Sprint';
+      const mins = parseInt(document.getElementById('study-min').value) || 20;
+      updateStudyDisplay(mins * 60);
+    }
+
+    const taskPool = [
+      { title: "Ch 1: Real Numbers Drill", desc: "Prove that √5 is irrational or solve HCF × LCM = a × b for two given numbers." },
+      { title: "Ch 2: Zeroes of Polynomial", desc: "Find the zeroes of x² + 7x + 10 and verify the relationship between zeroes and coefficients." },
+      { title: "Ch 3: Age Word Problem Drill", desc: "Solve the Nuri & Sonu age problem by creating a table for Present, Past (-5), and Future (+10) ages." },
+      { title: "Ch 3: Two-Digit Reversal Puzzle", desc: "Solve the two-digit number reversal question from NCERT (where sum of digits is 9)." },
+      { title: "Ch 4: Quadratic Word Problem", desc: "Solve the 'two numbers whose sum is 27 and product is 182' problem using the Quadratic Formula." },
+      { title: "Ch 4: Consecutive Squares Drill", desc: "Solve 'sum of squares of two consecutive positive integers is 365' using the Quadratic Formula." },
+      { title: "Ch 5: AP General Term", desc: "Find the 20th term from the last term of the AP: 3, 8, 13, ..., 253." },
+      { title: "Ch 5: AP Sum Drill", desc: "Calculate the sum of first 14 terms of an AP if S14 = 1050 and first term is 10." },
+      { title: "Ch 6: BPT Theorem Proof", desc: "State and prove the Basic Proportionality Theorem (Thales Theorem) on paper!" },
+      { title: "Ch 7: Distance Formula Check", desc: "Find the point on x-axis which is equidistant from (2, -5) and (-2, 9)." },
+      { title: "Ch 8: Trigonometry Proof 1", desc: "Prove that (cos A / (1 + sin A)) + ((1 + sin A) / cos A) = 2 sec A by converting to sin/cos and taking LCM." },
+      { title: "Ch 8: Trigonometry Identity 2", desc: "Prove that (sin A - 2 sin³ A) / (2 cos³ A - cos A) = tan A." }
+    ];
+
+    let availableTasks = [...taskPool];
+
+    function generateNextTask() {
+      if (availableTasks.length === 0) {
+        availableTasks = [...taskPool];
+      }
+      const randomIndex = Math.floor(Math.random() * availableTasks.length);
+      const t = availableTasks.splice(randomIndex, 1)[0];
+      document.getElementById('task-output').innerHTML = `<b>🎯 Your Task (${availableTasks.length} left in round):</b><br><span style="color:var(--accent-green); font-weight:bold;">${t.title}</span><br><br>${t.desc}`;
+    }
+
+    let waterInterval = null;
+    let waterSecondsLeft = 1800;
+    let waterCount = 0;
+
+    function setWaterMin(val) {
+      document.getElementById('water-min').value = val;
+      updateWaterDisplay(val * 60);
+    }
+
+    function updateWaterDisplay(secs) {
+      const m = Math.floor(secs / 60).toString().padStart(2, '0');
+      const s = (secs % 60).toString().padStart(2, '0');
+      document.getElementById('water-display').innerText = `${m}:${s}`;
+    }
+
+    function toggleWaterTimer() {
+      if (waterInterval) {
+        clearInterval(waterInterval);
+        waterInterval = null;
+        document.getElementById('water-btn').innerText = 'Start Water Alarm';
+      } else {
+        let mins = parseInt(document.getElementById('water-min').value) || 30;
+        mins = Math.min(Math.max(mins, 1), 60);
+        waterSecondsLeft = mins * 60;
+
+        document.getElementById('water-btn').innerText = 'Stop Water Alarm';
+        waterInterval = setInterval(() => {
+          waterSecondsLeft--;
+          updateWaterDisplay(waterSecondsLeft);
+          if (waterSecondsLeft <= 0) {
+            showAlarmModal('💧 Time to drink a glass of water!');
+            waterSecondsLeft = mins * 60;
+          }
+        }, 1000);
+      }
+    }
+
+    function addWaterGlass() {
+      if (waterCount < 8) waterCount++;
+      document.getElementById('water-count').innerText = `${waterCount} / 8 Glasses`;
+      document.getElementById('water-progress').style.width = `${(waterCount / 8) * 100}%`;
+    }
+
+    function resetWater() {
+      waterCount = 0;
+      document.getElementById('water-count').innerText = `0 / 8 Glasses`;
+      document.getElementById('water-progress').style.width = `0%`;
+    }
+
+    const chapters = [
+      { num: 1, name: "Real Numbers", difficulty: "easy" },
+      { num: 2, name: "Polynomials", difficulty: "easy" },
+      { num: 3, name: "Pair of Linear Equations", difficulty: "med" },
+      { num: 4, name: "Quadratic Equations", difficulty: "med" },
+      { num: 5, name: "Arithmetic Progressions", difficulty: "easy" },
+      { num: 6, name: "Triangles", difficulty: "hard" },
+      { num: 7, name: "Coordinate Geometry", difficulty: "easy" },
+      { num: 8, name: "Introduction to Trigonometry", difficulty: "hard" }
+    ];
+
+    function renderChapters() {
+      const container = document.getElementById('chapter-list');
+      container.innerHTML = chapters.map(c => `
+        <div class="checklist-item">
+          <input type="checkbox" id="ch-${c.num}">
+          <label for="ch-${c.num}" style="flex:1;">Ch ${c.num}: ${c.name}</label>
+          <span class="badge badge-${c.difficulty}">${c.difficulty}</span>
+        </div>
+      `).join('');
+    }
+    renderChapters();
+
+    function solveQuadratic() {
+      const a = parseFloat(document.getElementById('quad-a').value);
+      const b = parseFloat(document.getElementById('quad-b').value);
+      const c = parseFloat(document.getElementById('quad-c').value);
+
+      if (isNaN(a) || isNaN(b) || isNaN(c)) return;
+
+      const d = b * b - 4 * a * c;
+      let out = `<b>Equation:</b> ${a}x² + (${b})x + (${c}) = 0<br>`;
+      out += `<b>Discriminant (b² - 4ac):</b> ${d}<br>`;
+
+      if (d < 0) {
+        out += `<span style="color:#ef4444;">No real roots exist.</span>`;
+      } else {
+        const x1 = (-b + Math.sqrt(d)) / (2 * a);
+        const x2 = (-b - Math.sqrt(d)) / (2 * a);
+        out += `<span style="color:var(--accent-green);"><b>x₁ = ${x1}</b><br><b>x₂ = ${x2}</b></span>`;
+      }
+
+      document.getElementById('quad-output').innerHTML = out;
+    }
+
+    let errors = [];
+
+    function addError() {
+      const source = document.getElementById('err-source').value;
+      const q = document.getElementById('err-q').value.trim();
+      const mistake = document.getElementById('err-mistake').value.trim();
+
+      if (!q) return;
+
+      errors.push({ source, q, mistake, id: Date.now() });
+      document.getElementById('err-q').value = '';
+      document.getElementById('err-mistake').value = '';
+      renderErrors();
+    }
+
+    function deleteError(id) {
+      errors = errors.filter(e => e.id !== id);
+      renderErrors();
+    }
+
+    function renderErrors() {
+      const container = document.getElementById('error-list');
+      if (errors.length === 0) {
+        container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted); text-align:center;">No errors logged yet!</p>';
+        return;
+      }
+      container.innerHTML = errors.map(e => `
+        <div class="error-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span class="badge badge-hard">${e.source}</span>
+            <button onclick="deleteError(${e.id})" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer;">✕ Done</button>
+          </div>
+          <b>Question:</b> ${e.q}<br>
+          <span style="color:var(--accent-yellow);"><b>Mistake/Fix:</b> ${e.mistake || 'Needs re-practice'}</span>
+        </div>
+      `).join('');
+    }
+    renderErrors();
+  </script>
+</body>
+</html>
