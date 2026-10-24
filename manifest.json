@@ -2,6 +2,7 @@
   "name": "Class 10 Math Companion",
   "short_name": "MathApp",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#10b981",
@@ -9,7 +10,8 @@
     {
       "src": "icon.svg",
       "sizes": "192x192 512x512",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
