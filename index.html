@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class 10 Math & Hydration Companion</title>
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Class%2010%20Math%20Companion%22%2C%22short_name%22%3A%22MathApp%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%2310b981%22%7D">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-pink: #ec4899;
+      --accent-yellow: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      padding-bottom: 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      color: var(--accent-green);
+    }
+
+    p.subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    nav {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    nav button {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    nav button.active {
+      background: var(--accent-green);
+      color: #000;
+      border-color: var(--accent-green);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      color: var(--accent-blue);
+    }
+
+    .timer-display {
+      font-size: 2.8rem;
+      font-weight: 800;
+      text-align: center;
+      margin: 12px 0;
+      font-family: monospace;
+      color: var(--accent-green);
+    }
+
+    .timer-inputs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .timer-inputs input, .error-form input, .error-form textarea, .error-form select {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: #fff;
+    }
+
+    .timer-inputs input {
+      width: 70px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .presets {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .presets button {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      background: var(--accent-green);
+      color: #000;
+      font-size: 0.95rem;
+    }
+
+    .btn-blue { background: var(--accent-blue); color: #fff; }
+    .btn-cyan { background: var(--accent-cyan); color: #000; }
+    .btn-yellow { background: var(--accent-yellow); color: #000; }
+    .btn-danger { background: #ef4444; color: #fff; }
+
+    #focus-overlay {
+      position: fixed;
+      inset: 0;
+      background: #020617;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    #focus-overlay.active {
+      display: flex;
+    }
+
+    .water-counter {
+      font-size: 2.2rem;
+      font-weight: bold;
+      text-align: center;
+      color: var(--accent-cyan);
+      margin: 8px 0;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #0f172a;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent-cyan);
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .badge-easy { background: #059669; color: #fff; }
+    .badge-med { background: #d97706; color: #fff; }
+    .badge-hard { background: #dc2626; color: #fff; }
+
+    .calc-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .calc-row input {
+      flex: 1;
+      padding: 8px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      text-align: center;
+    }
+
+    .error-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .error-card {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .cheat-block {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .cheat-block h3 {
+      font-size: 0.95rem;
+      color: var(--accent-green);
+      margin-bottom: 6px;
+    }
+
+    .cheat-block ul {
+      padding-left: 18px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 0.85em;
+      padding: 0 2px;
+    }
+    .frac .top {
+      border-bottom: 1px solid var(--text);
+      padding-bottom: 1px;
+    }
+    .frac .bottom {
+      padding-top: 1px;
+    }
+
+    .audio-picker {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+    }
+
+    .audio-picker label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: var(--accent-yellow);
+    }
+
+    #alarm-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(220, 38, 38, 0.95);
+      z-index: 10000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Math & Hydration Companion</h1>
+    <p class="subtitle">Class 10 Math | Chapters 1-8 Complete Prep</p>
+  </header>
+
+  <nav>
+    <button class="active" onclick="switchTab('timer-tab', this)">1. Timer</button>
+    <button onclick="switchTab('coach-tab', this)">2. Next Task</button>
+    <button onclick="switchTab('water-tab', this)">3. Water</button>
+    <button onclick="switchTab('chapters-tab', this)">4. Chapters</button>
+    <button onclick="switchTab('tools-tab', this)">5. Calc</button>
+    <button onclick="switchTab('cheatsheet-tab', this)">6. Formula Sheet</button>
+    <button onclick="switchTab('errors-tab', this)">7. Error Log</button>
+  </nav>
+
+  <!-- 1. FOCUS TIMER -->
+  <div id="timer-tab" class="tab-content active">
+    <div class="card">
+      <h2>Study Timer (1 - 60 Mins)</h2>
+      
+      <div class="audio-picker">
+        <label for="custom-audio">🎵 Choose Alarm Song / Audio File:</label>
+        <input type="file" id="custom-audio" accept="audio/*" onchange="loadCustomAudio(event)" style="width:100%; font-size:0.8rem;">
+        <p id="audio-status" style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Default chime sound active</p>
+      </div>
+
+      <div class="timer-inputs">
+        <label for="study-min">Set Minutes:</label>
+        <input type="number" id="study-min" min="1" max="60" value="20">
+      </div>
+
+      <div class="presets">
+        <button onclick="setStudyMin(1)">1 min</button>
+        <button onclick="setStudyMin(5)">5 mins</button>
+        <button onclick="setStudyMin(15)">15 mins</button>
+        <button onclick="setStudyMin(20)">20 mins</button>
+        <button onclick="setStudyMin(45)">45 mins</button>
+      </div>
+
+      <div class="timer-display" id="study-display">20:00</div>
+
+      <button class="btn" id="study-btn" onclick="toggleStudyTimer()">Start Sprint</button>
+    </div>
+  </div>
+
+  <!-- 2. NEXT TASK COACH -->
+  <div id="coach-tab" class="tab-content">
+    <div class="card">
+      <h2>🎯 AI Study Coach</h2>
+      <p class="subtitle">Non-repeating random task generator across Ch 1 to 8!</p>
+      <button class="btn btn-blue" onclick="generateNextTask()" style="margin: 12px 0;">Give Me My Next Task!</button>
+      <div id="task-output" style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem; line-height: 1.6; min-height: 90px;">
+        Tap the button above to get your targeted Class 10 math task!
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. WATER TRACKER -->
+  <div id="water-tab" class="tab-content">
+    <div class="card">
+      <h2>Water Hydration Tracker</h2>
+      <p class="subtitle">Stay hydrated while studying!</p>
+
+      <div class="water-counter" id="water-count">0 / 8 Glasses</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="water-progress"></div>
+      </div>
+
+      <button class="btn btn-cyan" onclick="addWaterGlass()" style="margin-bottom: 12px;">+ Log 1 Glass of Water</button>
+      <button class="btn btn-danger" onclick="resetWater()" style="padding:6px; font-size:0.8rem;">Reset Count</button>
+    </div>
+
+    <div class="card">
+      <h2>Hydration Reminder (1 - 60 Mins)</h2>
+      
+      <div class="timer-inputs">
+        <label for="water-min">Remind every:</label>
+        <input type="number" id="water-min" min="1" max="60" value="30">
+        <span>mins</span>
+      </div>
+
+      <div class="presets">
+        <button onclick="setWaterMin(5)">5 mins</button>
+        <button onclick="setWaterMin(15)">15 mins</button>
+        <button onclick="setWaterMin(30)">30 mins</button>
+        <button onclick="setWaterMin(45)">45 mins</button>
+      </div>
+
+      <div class="timer-display" style="color:var(--accent-cyan);" id="water-display">30:00</div>
+
+      <button class="btn btn-cyan" id="water-btn" onclick="toggleWaterTimer()">Start Water Alarm</button>
+    </div>
+  </div>
+
+  <!-- 4. CHAPTERS -->
+  <div id="chapters-tab" class="tab-content">
+    <div class="card">
+      <h2>Class 10 Triage Checklist</h2>
+      <div id="chapter-list"></div>
+    </div>
+  </div>
+
+  <!-- 5. QUADRATIC CALCULATOR -->
+  <div id="tools-tab" class="tab-content">
+    <div class="card">
+      <h2>Quadratic Formula Solver</h2>
+      <p class="subtitle">Solves ax² + bx + c = 0</p>
+      
+      <div class="calc-row">
+        <input type="number" id="quad-a" placeholder="a" value="1">
+        <input type="number" id="quad-b" placeholder="b" value="-27">
+        <input type="number" id="quad-c" placeholder="c" value="182">
+      </div>
+
+      <button class="btn btn-blue" onclick="solveQuadratic()">Solve Step-by-Step</button>
+
+      <div id="quad-output" style="margin-top: 12px; font-size: 0.9rem; line-height: 1.5;"></div>
+    </div>
+  </div>
+
+  <!-- 6. CLEAN FORMULA SHEET FOR ALL CHAPTERS -->
+  <div id="cheatsheet-tab" class="tab-content">
+    <div class="card">
+      <h2>Formula Sheet (Chapters 1 to 8)</h2>
+      
+      <div class="cheat-block">
+        <h3>Ch 1: Real Numbers</h3>
+        <ul>
+          <li><b>HCF × LCM = a × b</b> (for two positive integers a and b).</li>
+          <li><b>Fundamental Theorem:</b> Every composite number can be uniquely factorized into prime numbers.</li>
+        </ul>
+      </div>
+
+      <div class="cheat-block">
+        <h3>Ch 2: Polynomials</h3>
+        <ul>
+          <li>Quadratic Polynomial: ax² + bx + c</li>
+          <li><b>Sum of zeroes (α + β)</b> = <span class="frac"><span class="top">-b</span><span class="bottom">a</span></span></li>
+          <li><b>Product of zeroes (αβ)</b> = <span class="frac"><span class="top">c</span><span class="bottom">a</span></span></li>
+        </ul>
+      </div>
+
+      <div class="cheat-block">
+        <h3>Ch 3: Pair of Linear Equations</h3>
+        <ul>
+          <li><b>Unique Solution:</b> <span class="frac"><span class="top">a₁</span><span class="bottom">a₂</span></span> ≠ <span class="frac"><span class="top">b₁</span><span class="bottom">b₂</span></span></li>
+          <li><b>Infinitely Many Solutions:</b> <span class="frac"><span class="top">a₁</span><span class="bottom">a₂</span></span> = <span class="frac"><span class="top">b₁</span><span class="bottom">b₂</span></span> = <span class="frac"><span class="top">c₁</span><span class="bottom">c₂</span></span></li>
+          <li><b>No Solution:</b> <span class="frac"><span class="top">a₁</span><span class="bottom">a₂</span></span> = <span class="frac"><span class="top">b₁</span><span class="bottom">b₂</span></span> ≠ <span class="frac"><span class="top">c₁</span><span class="bottom">c₂</span></span></li>
+        </ul>
+      </div>
+
+      <div class="cheat-block">
+        <h3>Ch 4: Quadratic Equations</h3>
+        <ul>
+          <li>Standard Form: ax² + bx + c = 0</li>
+          <li><b>Discriminant (D):</b> b² - 4ac</li>
+          <li><b>Quadratic Formula:</b> x = <span class="frac"><span class="top">-b ± √(b² - 4ac)</span><span class="bottom">2a</span></span></li>
+          <li>If D > 0: Two distinct real roots | If D = 0: Two equal real roots | If D &lt; 0: No real roots.</li>
+        </ul>
+      </div>
+
+      <div class="cheat-block">
+        <h3>Ch 5: Arithmetic Progressions (AP)</h3>
+        <ul>
+          <li><b>n-th term (a<sub>n</sub>):</b> a + (n - 1)d</li>
+          <li><b>Sum of n terms (S<sub>n</sub>):</b> <span class="frac"><span class="top">n</span><span class="bottom">2</span></span> [2a + (n - 1)d] or <span class="frac"><span class="top">n</span><span class="bottom">2</span></span> (a + l)</li>
+        </ul>
+      </div>
+
+      <div class="cheat-block">
+        <h3>Ch 6: Triangles</h3>
+        <ul>
+          <li><b>Thales / BPT Theorem:</b> If a line is drawn parallel to one side of a triangle intersecting the other two sides, it divides them in the same ratio.</li>
+          <li><b>Similarity Criteria:</b> AAA, SAS, SSS.</li>
+        </ul>
+      </div>
+
+      <div class="cheat-block">
+        <h3>Ch 7: Coordinate Geometry</h3>
+        <ul>
+          <li><b>Distance Formula:</b> √[(x₂ - x₁)² + (y₂ - y₁)²]</li>
+          <li><b>Section Formula:</b> (<span class="frac"><span class="top">m₁x₂ + m₂x₁</span><span class="bottom">m₁ + m₂</span></span> , <span class="frac"><span class="top">m₁y₂ + m₂y₁</span><span class="bottom">m₁ + m₂</span></span>)</li>
+          <li><b>Midpoint Formula:</b> (<span class="frac"><span class="top">x₁ + x₂</span><span class="bottom">2</span></span> , <span class="frac"><span class="top">y₁ + y₂</span><span class="bottom">2</span></span>)</li>
+        </ul>
+      </div>
+
+      <div class="cheat-block">
+        <h3>Ch 8: Trigonometry</h3>
+        <ul>
+          <li>sin θ = <span class="frac"><span class="top">P</span><span class="bottom">H</span></span> , cos θ = <span class="frac"><span class="top">B</span><span class="bottom">H</span></span> , tan θ = <span class="frac"><span class="top">P</span><span class="bottom">B</span></span></li>
+          <li>tan θ = <span class="frac"><span class="top">sin θ</span><span class="bottom">cos θ</span></span> , cot θ = <span class="frac"><span class="top">cos θ</span><span class="bottom">sin θ</span></span></li>
+          <li>sec θ = <span class="frac"><span class="top">1</span><span class="bottom">cos θ</span></span> , cosec θ = <span class="frac"><span class="top">1</span><span class="bottom">sin θ</span></span></li>
+          <li><b>Identities:</b> sin²θ + cos²θ = 1 | 1 + tan²θ = sec²θ | 1 + cot²θ = cosec²θ</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 7. ERROR LOG & TRACKER -->
+  <div id="errors-tab" class="tab-content">
+    <div class="card">
+      <h2>📝 RD Sharma / RS Aggarwal / Exam Error Log</h2>
+      <p class="subtitle" style="margin-bottom:12px;">Log questions you got wrong to revise and correct them!</p>
+      
+      <div class="error-form">
+        <select id="err-source">
+          <option value="RD Sharma">RD Sharma</option>
+          <option value="RS Aggarwal">RS Aggarwal</option>
+          <option value="School Test">School Test</option>
+          <option value="Tuition Test">Tuition Test</option>
+          <option value="NCERT">NCERT</option>
+        </select>
+        <input type="text" id="err-q" placeholder="Question or Topic (e.g., Ch 4 Age Problem)">
+        <textarea id="err-mistake" rows="2" placeholder="What went wrong? (e.g., Panic, wrong formula, couldn't factorize)"></textarea>
+        <button class="btn btn-yellow" onclick="addError()">Save to Error Log</button>
+      </div>
+
+      <div id="error-list"></div>
+    </div>
+  </div>
+
+  <!-- FOCUS OVERLAY -->
+  <div id="focus-overlay">
+    <h2 style="color:var(--accent-pink); font-size: 1.6rem; margin-bottom: 12px;">FOCUS MODE ACTIVE</h2>
+    <p style="margin-bottom: 20px;">Put your phone down. Solve questions on paper!</p>
+    <div class="timer-display" id="overlay-timer" style="color:var(--accent-pink); margin-bottom: 24px;">20:00</div>
+    <button class="btn btn-danger" onclick="stopStudyTimer()">Stop Focus Mode</button>
+  </div>
+
+  <!-- ALARM TRIGGER MODAL -->
+  <div id="alarm-modal">
+    <h2 style="color:#fff; font-size: 1.8rem; margin-bottom: 12px;">⏰ TIME IS UP!</h2>
+    <p style="color:#fff; margin-bottom: 20px; font-weight:bold;" id="alarm-msg">Tap below to play your alarm sound!</p>
+    <button class="btn btn-yellow" onclick="startAlarmPlay()" style="font-size:1.1rem; padding:14px; margin-bottom:12px;">🔔 PLAY ALARM SONG</button>
+    <button class="btn btn-danger" onclick="stopAlarmModal()" style="font-size:0.9rem; padding:8px;">Dismiss</button>
+  </div>
+
+  <script>
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    let customAudioPlayer = new Audio();
+    customAudioPlayer.loop = true;
+    let isCustomAudioLoaded = false;
+    let synthInterval = null;
+
+    function loadCustomAudio(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        customAudioPlayer.src = fileURL;
+        isCustomAudioLoaded = true;
+        document.getElementById('audio-status').innerText = `Loaded: ${file.name}`;
+        document.getElementById('audio-status').style.color = 'var(--accent-green)';
+      }
+    }
+
+    function showAlarmModal(msg) {
+      document.getElementById('alarm-msg').innerText = msg;
+      document.getElementById('alarm-modal').style.display = 'flex';
+      if ('vibrate' in navigator) navigator.vibrate([500, 250, 500, 250]);
+    }
+
+    function startAlarmPlay() {
+      if (isCustomAudioLoaded) {
+        customAudioPlayer.play().catch(e => console.log(e));
+      } else {
+        playBeepPattern();
+        if (synthInterval) clearInterval(synthInterval);
+        synthInterval = setInterval(playBeepPattern, 1200);
+      
